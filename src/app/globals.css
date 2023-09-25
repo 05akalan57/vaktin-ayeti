@@ -9,3 +9,9 @@ html {
 body {
   -webkit-tap-highlight-color: transparent;
 }
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+}

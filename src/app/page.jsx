@@ -2,15 +2,13 @@ import { Noto_Naskh_Arabic } from 'next/font/google'
 
 import { FaQuran } from 'react-icons/fa'
 
-import FramerAnimation from './components/FramerAnimation'
-
 const NotoNaskhArabic = Noto_Naskh_Arabic({ subsets: ['arabic'] })
 
 async function getData() {
   return await fetch(
-    `https://api.acikkuran.com/surah/${
-      Math.floor(Math.random() * 114) + 1
-    }?author=15`,
+    `https://api.alquran.cloud/v1/ayah/${
+      Math.floor(Math.random() * 6236) + 1
+    }/editions/quran-uthmani,tr.yazir,ar.alafasy`,
     { next: { revalidate: 900 } }
   )
 }
@@ -19,46 +17,48 @@ export default async function Home() {
   const data = await getData()
     .then((res) => res.json())
     .then((resJSON) => {
-      const surahName = resJSON.data.name
-      const randomVerseNumber =
-        Math.floor(Math.random() * resJSON.data.verse_count) + 1
-      const verse = resJSON.data.verses[randomVerseNumber].verse
-      const translationText =
-        resJSON.data.verses[randomVerseNumber].translation.text
+      const surahName = resJSON.data[0].surah.englishName
+      const verseNumber = resJSON.data[0].numberInSurah
+
+      const arabicVerseText = resJSON.data[0].text
+      const translationVerseText = resJSON.data[1].text
+
+      const verseAudioUrl = resJSON.data[2].audio
 
       return {
         surahName,
-        randomVerseNumber,
-        verse,
-        translationText
+        verseNumber,
+        arabicVerseText,
+        translationVerseText,
+        verseAudioUrl
       }
     })
 
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <title>{`Vaktin Ayeti | ${data.surahName} Suresi - ${
-        data.randomVerseNumber + 1
-      }. Ayet`}</title>
-      <FramerAnimation>
+    <main className="flex h-full items-center justify-center">
+      <title>{`Vaktin Ayeti | ${data.surahName} - ${data.verseNumber}. Ayet`}</title>
+
+      <div className="mx-4 max-h-[680px] w-[500px] overflow-y-auto rounded-2xl bg-[#1d1d1d]/60 p-4 shadow-2xl backdrop-blur">
         <div className="mb-4 flex">
           <div className="mr-4 rounded-full border border-white/60 p-4 text-xl">
             <FaQuran />
           </div>
           <div className="flex flex-col justify-around">
             <div className="text-lg font-bold">Vaktin Ayeti</div>
-            <div className="text-base font-light">{`${
-              data.surahName
-            } Suresi - ${data.randomVerseNumber + 1}. Ayet`}</div>
+            <div className="text-base font-light">{`${data.surahName} - ${data.verseNumber}. Ayet`}</div>
           </div>
         </div>
         <div className="space-y-2">
           <div className={`text-lg ${NotoNaskhArabic.className}`} dir="rtl">
-            {data.verse}
+            {data.arabicVerseText}
           </div>
           <div className="rounded border border-white/60" />
-          <div className={`text-base `}>{data.translationText}</div>
+          <div className="text-base">{data.translationVerseText}</div>
         </div>
-      </FramerAnimation>
+        <audio controls className="mt-4 w-full">
+          <source src={data.verseAudioUrl} type="audio/mpeg" />
+        </audio>
+      </div>
     </main>
   )
 }
