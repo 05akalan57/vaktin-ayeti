@@ -1,3 +1,5 @@
+import { Analytics } from '@vercel/analytics/react'
+
 import ThemeSwitcher from './components/ThemeSwitcher'
 
 import './globals.css'
@@ -18,6 +20,7 @@ export default function RootLayout({ children }) {
       <body>
         {children}
         <ThemeSwitcher />
+        <Analytics />
       </body>
     </html>
   )
